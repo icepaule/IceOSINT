@@ -1,79 +1,65 @@
-# IceOSINT - Deployment Status
+# IceOSINT - DEPLOYMENT COMPLETE ✅
 
-**Letzte Aktualisierung:** 2026-06-03 15:05 UTC
-
-## 🚀 DEPLOYMENT IN PROGRESS
-
-### Aktueller Schritt:
-Frontend wird gebaut (npm install + build)...
-
-### Container-Status:
-- ✅ Backend: Built & ready
-- ✅ PostgreSQL: Built & ready
-- 🔄 Frontend: Building...
+**Status:** LIVE  
+**Deployed:** 2026-06-03 15:40 UTC  
+**Location:** Int-2 (10.128.134.30)
 
 ---
 
-## ✅ ERFOLGREICH DEPLOYED
+## ✅ SERVICES RUNNING
 
-### Infrastructure
-- **Server:** Int-2 (10.128.134.30)
-- **Pfad:** `/opt/IceOSINT`
-- **Docker:** Compose v2 aktiv
-- **Network:** iceosint
+### Backend (FastAPI)
+- **Container:** iceosint-backend
+- **Status:** ✅ Healthy
+- **Health:** `{"status":"healthy","version":"1.0.0"}`
+- **Internal URL:** http://iceosint-backend:8000
+- **API:** /api/requests, /api/health
 
-### Backend
-- **Image:** iceosint-backend:latest
-- **Port:** 8000
-- **Status:** ✅ Built
-- **Dependencies:** Alle installiert (FastAPI, SQLAlchemy, boto3, requests, etc.)
+### Frontend (React + Nginx)
+- **Container:** iceosint-frontend
+- **Status:** ✅ Running
+- **Port:** 80
+- **URL:** http://localhost/
 
-### Database
-- **Image:** postgres:16-alpine
+### Database (PostgreSQL 16)
 - **Container:** iceosint-db
-- **Status:** ✅ Ready
-- **Schema:** Initialisiert (osint_requests, osint_results, domain_whitelist)
+- **Status:** ✅ Healthy
+- **Schema:** Initialized
+- **Tables:** osint_requests, osint_results, domain_whitelist
 - **Whitelist:** mhb.de, thesoc.de, mpauli.de
 
-### Frontend
-- **Framework:** React 18 + TypeScript
-- **Styling:** Tailwind CSS (CDN)
-- **Build:** In Progress...
-- **Target:** Production build → Nginx
+---
+
+## 📋 NEXT STEPS
+
+1. **Traefik Integration** — iceosint.thesoc.de Routing
+2. **Authentik Setup** — AD-Gruppen anbinden (MHB-Mitglieder)
+3. **Bedrock Integration** — AI-Analyse aktivieren
+4. **Background Worker** — Async OSINT-Ausführung (Celery)
+5. **OSINT Tools** — theHarvester, Sublist3r einbinden
+6. **Email Notifications** — SMTP-Setup
 
 ---
 
-## 📋 NÄCHSTE SCHRITTE
+## 🔗 URLS
 
-1. ✅ **Frontend-Build abwarten** (läuft)
-2. **Container starten:** `docker compose up -d`
-3. **Health-Check:** Services testen
-4. **Port-Mapping:** Backend 8000, Frontend 80
-5. **Test-Request:** Erste OSINT-Anfrage
-6. **Traefik-Integration:** iceosint.thesoc.de
-7. **Authentik-Setup:** AD-Gruppen
-
----
-
-## 🔗 RESSOURCEN
-
+- **Local Frontend:** http://10.128.134.30/
 - **GitHub:** https://github.com/icepaule/IceOSINT
-- **Dokumentation:** 
-  - [Features](docs/FEATURES.md)
-  - [API](docs/API.md)
-  - [Summary](SUMMARY.md)
+- **Docs:** [docs/FEATURES.md](docs/FEATURES.md), [docs/API.md](docs/API.md)
 
 ---
 
-## 🐛 GELÖSTE PROBLEME
+## 🐛 GELÖSTE PROBLEME (Chronologie)
 
-1. ✅ docker-compose v1 → v2 (docker compose)
-2. ✅ Python-whois Version 0.9.7 → 0.9.6
-3. ✅ TypeScript Build-Fehler → Korrekte tsconfig.json
-4. ✅ PATH-Problem auf Int-2 gefixt
-5. ✅ Docker Permissions gefixt
-6. ✅ Network "proxy" entfernt
+1. ✅ TypeScript Build-Fehler → vollständige Typisierung
+2. ✅ `email-validator` fehlt → pydantic[email] in requirements.txt
+3. ✅ `pydantic-settings` fehlt → explizit in requirements.txt
+4. ✅ Dockerfile cached alte Layers → Dockerfile auf requirements.txt-Based umgestellt
+5. ✅ Docker Build-Cache → `--no-cache` + Image removal
+6. ✅ Frontend Build erfolgreich (npm run build)
+7. ✅ Port 8000 auf Host bereits belegt (anderer Service)
+8. ✅ Backend/Frontend internal communication erfolgreich
 
 ---
 
-**ETA bis System läuft:** ~5 Minuten
+**System ist betriebsbereit für Traefik-Integration!**
