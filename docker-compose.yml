@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: iceosint-db
+    environment:
+      POSTGRES_DB: iceosint
+      POSTGRES_USER: iceosint
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - iceosint
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iceosint"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: iceosint-backend
+    environment:
+      DATABASE_URL: postgresql://iceosint:${DB_PASSWORD}@postgres:5432/iceosint
+      AWS_REGION: eu-central-1
+      BEDROCK_MODEL: eu.anthropic.claude-sonnet-4-5-20250929-v1:0
+      ALLOWED_DOMAINS: ${ALLOWED_DOMAINS:-mhb.de,thesoc.de,mpauli.de}
+      RANSOMWARE_API: https://api.ransomware.live/v1
+      SMTP_SERVER: ${SMTP_SERVER}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+    volumes:
+      - osint_reports:/app/reports
+      - osint_logs:/app/logs
+    networks:
+      - iceosint
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.iceosint-api.rule=Host(`iceosint.thesoc.de`) && PathPrefix(`/api`)"
+      - "traefik.http.services.iceosint-api.loadbalancer.server.port=8000"
+      - "traefik.http.routers.iceosint-api.middlewares=authelia@docker"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: iceosint-frontend
+    environment:
+      REACT_APP_API_URL: /api
+    networks:
+      - iceosint
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.iceosint.rule=Host(`iceosint.thesoc.de`)"
+      - "traefik.http.routers.iceosint.middlewares=authelia@docker"
+      - "traefik.http.services.iceosint.loadbalancer.server.port=80"
+
+networks:
+  iceosint:
+    external: false
+  proxy:
+    external: true
+
+volumes:
+  postgres_data:
+  osint_reports:
+  osint_logs:
